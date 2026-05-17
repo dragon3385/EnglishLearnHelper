@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英语学习助手</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>英语学习助手</h1>
+    <p class="subtitle">帮助孩子管理课本单词</p>
+  </header>
+
+  <nav id="tabs">
+    <button class="tab active" data-tab="input">录入课文</button>
+    <button class="tab" data-tab="lookup">查单词</button>
+    <button class="tab" data-tab="browse">浏览教材</button>
+    <button class="tab" data-tab="import">批量导入</button>
+    <button class="tab" data-tab="settings">管理</button>
+  </nav>
+
+  <main>
+    <!-- Tab 1: Input Lesson Text -->
+    <section id="tab-input" class="tab-content active">
+      <h2>录入课文</h2>
+      <div class="card">
+        <div class="form-row">
+          <label>教材:</label>
+          <select id="sel-book"><option value="">-- 请选择或新建 --</option></select>
+          <input id="inp-book-name" placeholder="新教材名称（如：人教版PEP三年级上册）">
+        </div>
+        <div class="form-row" id="row-book-meta">
+          <input id="inp-publisher" placeholder="出版社（可选）">
+          <input id="inp-grade" placeholder="年级（可选）">
+          <input id="inp-semester" placeholder="学期（可选）">
+        </div>
+        <div class="form-row">
+          <label>单元:</label>
+          <select id="sel-unit"><option value="">-- 请选择或新建 --</option></select>
+          <input id="inp-unit-no" type="number" placeholder="单元号" min="1" style="width:80px">
+          <input id="inp-unit-title" placeholder="单元标题（可选）">
+        </div>
+        <div class="form-row">
+          <label>课次:</label>
+          <select id="sel-lesson"><option value="">-- 请选择或新建 --</option></select>
+          <input id="inp-lesson-no" type="number" placeholder="课次号" min="1" style="width:80px">
+          <input id="inp-lesson-title" placeholder="课次标题（可选）">
+        </div>
+        <div class="form-row">
+          <label>文本类型:</label>
+          <select id="sel-text-type">
+            <option value="main">正文</option>
+            <option value="dialogue">对话</option>
+            <option value="words">单词表</option>
+          </select>
+        </div>
+        <textarea id="inp-content" rows="6" placeholder="请粘贴课文内容..."></textarea>
+        <button id="btn-save-text" class="btn-primary">保存并分析</button>
+      </div>
+      <div id="input-result" class="result-area" style="display:none"></div>
+    </section>
+
+    <!-- Tab 2: Lookup Word -->
+    <section id="tab-lookup" class="tab-content">
+      <h2>查单词</h2>
+      <div class="card">
+        <input id="inp-word" placeholder="输入任意变形（如 went, animals, played）" autocomplete="off">
+      </div>
+      <div id="lookup-result" class="result-area" style="display:none"></div>
+    </section>
+
+    <!-- Tab 3: 浏览教材 -->
+    <section id="tab-browse" class="tab-content">
+      <h2>浏览教材</h2>
+      <div id="browse-tree" class="tree-area"></div>
+    </section>
+
+    <!-- Tab 4: 批量导入 -->
+    <section id="tab-import" class="tab-content">
+      <h2>批量导入</h2>
+      <div class="card">
+        <p class="hint">格式说明：每课用 <code>---</code> 分隔。头行: <code>Book name | Unit# | Unit title | Lesson# | Lesson title</code>，后续行为课文内容。首行可用 <code>#</code> 作为注释。</p>
+        <textarea id="inp-batch" rows="10" placeholder="PEP G3 Vol1|1|Hello!|1|Greeting
+Hello! My name is Tom.
+Nice to meet you!
+---
+PEP G3 Vol1|1|Hello!|2|Colors
+Look at the red apple. The yellow banana is big."></textarea>
+        <button id="btn-import" class="btn-primary">导入</button>
+      </div>
+      <div id="import-result" class="result-area" style="display:none"></div>
+    </section>
+
+    <!-- Tab 5: 管理 -->
+    <section id="tab-settings" class="tab-content">
+      <h2>管理</h2>
+      <div class="card">
+        <p>重建单词索引，按教材顺序重新计算每个单词的首次出现课程。</p>
+        <button id="btn-rebuild" class="btn-warning">重建单词索引</button>
+        <div id="rebuild-result" class="result-area" style="display:none"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>英语学习助手 &copy; 2026</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

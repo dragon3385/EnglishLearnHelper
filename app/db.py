@@ -1,5 +1,6 @@
-﻿import sqlite3
+import sqlite3
 import os
+from contextlib import contextmanager
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "english_helper.db")
 
@@ -8,7 +9,7 @@ STOP_WORDS = frozenset({
     "am", "is", "are", "was", "were", "be", "been", "being",
     "have", "has", "had", "do", "does", "did",
     "will", "would", "shall", "should", "can", "could", "may", "might", "must",
-    "i", "me", "my", "mine", "myself",
+    "me", "my", "mine", "myself",
     "you", "your", "yours", "yourself", "yourselves",
     "he", "him", "his", "himself",
     "she", "her", "hers", "herself",
@@ -35,6 +36,13 @@ def get_connection(autocommit=False):
         conn.isolation_level = None
     return conn
 
+@contextmanager
+def get_db():
+    conn = get_connection()
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 def init_db():
     conn = get_connection()
@@ -129,6 +137,15 @@ def init_db():
         )
     """)
     cur.execute("CREATE INDEX IF NOT EXISTS idx_quiz_log_word_id ON word_quiz_log(word_id)")
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS excluded_words (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            word        TEXT NOT NULL UNIQUE,
+            created_at  TEXT DEFAULT (datetime('now', 'localtime'))
+        )
+    """)
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_excluded_words_word ON excluded_words(word)")
 
     conn.commit()
     conn.close()

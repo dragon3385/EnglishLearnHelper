@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -13,71 +13,184 @@
   </header>
 
   <nav id="tabs">
-    <button class="tab active" data-tab="input">录入课文</button>
-    <button class="tab" data-tab="lookup">查单词</button>
+    <button class="tab active" data-tab="learn">学习</button>
     <button class="tab" data-tab="browse">浏览教材</button>
-    <button class="tab" data-tab="import">批量导入</button>
-    <button class="tab" data-tab="settings">管理</button>
+    <button class="tab" data-tab="manage">管理</button>
+  </nav>
+
+  <nav id="sub-tabs-learn" class="sub-tabs visible">
+    <button class="sub-tab active" data-subtab="lookup">查单词</button>
+    <button class="sub-tab" data-subtab="vocab">生词表</button>
+    <button class="sub-tab" data-subtab="quiz">测验</button>
+  </nav>
+
+  <nav id="sub-tabs-manage" class="sub-tabs">
+    <button class="sub-tab active" data-subtab="input">录入课文</button>
+    <button class="sub-tab" data-subtab="settings">管理</button>
+    <button class="sub-tab" data-subtab="excluded">排除词</button>
+    <button class="sub-tab" data-subtab="batch">批量导入</button>
+    <button class="sub-tab" data-subtab="migrate">数据迁移</button>
   </nav>
 
   <main>
-    <!-- Tab 1: Input Lesson Text -->
-    <section id="tab-input" class="tab-content active">
-      <h2>录入课文</h2>
-      <div class="card">
-        <div class="form-row">
-          <label>教材:</label>
-          <select id="sel-book"><option value="">-- 请选择或新建 --</option></select>
-          <input id="inp-book-name" placeholder="新教材名称（如：人教版PEP三年级上册）">
+    <!-- Learn: Lookup -->
+    <section id="tab-learn" class="tab-content active">
+      <div id="subtab-lookup" class="subtab-content active">
+        <h2>查单词</h2>
+        <div class="card">
+          <input id="inp-word" placeholder="输入任意变形（如 went, animals, played）" autocomplete="off">
         </div>
-        <div class="form-row" id="row-book-meta">
-          <input id="inp-publisher" placeholder="出版社（可选）">
-          <input id="inp-grade" placeholder="年级（可选）">
-          <input id="inp-semester" placeholder="学期（可选）">
-        </div>
-        <div class="form-row">
-          <label>单元:</label>
-          <select id="sel-unit"><option value="">-- 请选择或新建 --</option></select>
-          <input id="inp-unit-no" type="number" placeholder="单元号" min="1" style="width:80px">
-          <input id="inp-unit-title" placeholder="单元标题（可选）">
-        </div>
-        <div class="form-row">
-          <label>课次:</label>
-          <select id="sel-lesson"><option value="">-- 请选择或新建 --</option></select>
-          <input id="inp-lesson-no" type="number" placeholder="课次号" min="1" style="width:80px">
-          <input id="inp-lesson-title" placeholder="课次标题（可选）">
-        </div>
-        <div class="form-row">
-          <label>文本类型:</label>
-          <select id="sel-text-type">
-            <option value="main">正文</option>
-            <option value="dialogue">对话</option>
-            <option value="words">单词表</option>
+        <div id="lookup-result" class="result-area" style="display:none"></div>
+      </div>
+
+      <div id="subtab-vocab" class="subtab-content">
+        <h2>生词表</h2>
+        <div class="card">
+          <input id="inp-vocab-search" placeholder="搜索单词..." autocomplete="off">
+          <select id="sel-vocab-sort">
+            <option value="freq">按频率</option>
+            <option value="alpha">按字母</option>
+            <option value="lesson">按课次</option>
           </select>
         </div>
-        <textarea id="inp-content" rows="6" placeholder="请粘贴课文内容..."></textarea>
-        <button id="btn-save-text" class="btn-primary">保存并分析</button>
+        <div id="vocab-result" class="result-area"></div>
       </div>
-      <div id="input-result" class="result-area" style="display:none"></div>
+
+      <div id="subtab-quiz" class="subtab-content">
+        <h2>测验</h2>
+        <div id="quiz-mode-area">
+          <div class="mode-selector">
+            <button class="mode-btn" data-mode="random" onclick="startQuiz('random')">🎲 随机抽测</button>
+            <button class="mode-btn" data-mode="lesson" onclick="showLessonPicker()">📖 按课测验</button>
+            <button class="mode-btn" data-mode="mistakes" onclick="startQuiz('mistakes')">❌ 错题重测</button>
+            <button class="mode-btn" data-mode="list" onclick="loadMistakes()" style="background:var(--info)">📋 查看错题本</button>
+          </div>
+          <div id="lesson-picker" style="display:none;margin-top:12px">
+            <div class="form-row">
+              <label>教材:</label>
+              <select id="sel-quiz-book"><option value="">-- 选择教材 --</option></select>
+            </div>
+            <div class="form-row">
+              <label>单元:</label>
+              <select id="sel-quiz-unit"><option value="">-- 选择单元 --</option></select>
+            </div>
+            <div class="form-row">
+              <label>课次:</label>
+              <select id="sel-quiz-lesson"><option value="">-- 选择课次 --</option></select>
+            </div>
+            <button class="btn-primary" onclick="startLessonQuiz()">开始测验</button>
+          </div>
+          <div id="quiz-count-picker" style="display:none;margin-top:12px">
+            <p>输入抽测数量:</p>
+            <input id="sel-quiz-count" type="number" value="10" min="1" max="100" style="width:80px">
+            <label style="margin-left:12px"><input type="checkbox" id="chk-quiz-shuffle" checked> 打乱顺序</label>
+            <button class="btn-primary" onclick="confirmRandomQuiz()">开始</button>
+          </div>
+        </div>
+
+        <div id="quiz-play-area" style="display:none">
+          <div class="quiz-progress">
+            <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
+            <span id="quiz-progress-text">0/0</span>
+          </div>
+          <div class="quiz-card">
+            <div class="quiz-word" id="quiz-word"></div>
+            <div class="quiz-forms" id="quiz-forms"></div>
+            <div class="quiz-hint" id="quiz-hint" style="display:none"></div>
+          </div>
+          <div class="quiz-actions">
+            <button class="quiz-btn-unknown" onclick="submitAnswer('unknown')">✗ 不认识</button>
+            <button class="quiz-btn-known" onclick="submitAnswer('known')">✓ 认识</button>
+          </div>
+          <button class="quiz-hint-btn" id="quiz-hint-btn" onclick="showQuizHint()">💡 显示提示</button>
+        </div>
+
+        <div id="quiz-result-area" style="display:none">
+        </div>
+
+        <div id="mistakes-list-area" style="display:none">
+          <h3 style="margin-bottom:12px">错题本</h3>
+          <div id="mistakes-list"></div>
+          <button class="btn-primary" style="margin-top:12px" onclick="startQuiz('mistakes')">错题重测</button>
+        </div>
+      </div>
     </section>
 
-    <!-- Tab 2: Lookup Word -->
-    <section id="tab-lookup" class="tab-content">
-      <h2>查单词</h2>
-      <div class="card">
-        <input id="inp-word" placeholder="输入任意变形（如 went, animals, played）" autocomplete="off">
-      </div>
-      <div id="lookup-result" class="result-area" style="display:none"></div>
-    </section>
-
-    <!-- Tab 3: 浏览教材 -->
+    <!-- Tab 2: Browse -->
     <section id="tab-browse" class="tab-content">
       <h2>浏览教材</h2>
       <div id="browse-tree" class="tree-area"></div>
     </section>
 
-    <!-- Tab 4: 批量导入 -->
-    <section id="tab-import" class="tab-content">
+
+
+    <!-- Tab 4: Manage -->
+    <section id="tab-manage" class="tab-content">
+      <div id="subtab-input" class="subtab-content active">
+        <h2>录入课文</h2>
+        <div class="card">
+          <div class="form-row">
+            <label>教材:</label>
+            <select id="sel-book"><option value="">-- 请选择或新建 --</option></select>
+            <input id="inp-book-name" placeholder="新教材名称（如：人教版PEP三年级上册）">
+          </div>
+          <div class="form-row" id="row-book-meta">
+            <input id="inp-publisher" placeholder="出版社（可选）">
+            <input id="inp-grade" placeholder="年级（可选）">
+            <input id="inp-semester" placeholder="学期（可选）">
+          </div>
+          <div class="form-row">
+            <label>单元:</label>
+            <select id="sel-unit"><option value="">-- 请选择或新建 --</option></select>
+            <input id="inp-unit-no" type="number" placeholder="单元号" min="1" style="width:80px">
+            <input id="inp-unit-title" placeholder="单元标题（可选）">
+          </div>
+          <div class="form-row">
+            <label>课次:</label>
+            <select id="sel-lesson"><option value="">-- 请选择或新建 --</option></select>
+            <input id="inp-lesson-no" type="number" placeholder="课次号" min="1" style="width:80px">
+            <input id="inp-lesson-title" placeholder="课次标题（可选）">
+          </div>
+          <div class="form-row">
+            <label>文本类型:</label>
+            <select id="sel-text-type">
+              <option value="main">正文</option>
+              <option value="dialogue">对话</option>
+              <option value="words">单词表</option>
+            </select>
+          </div>
+          <textarea id="inp-content" rows="6" placeholder="请粘贴课文内容..."></textarea>
+          <button id="btn-save-text" class="btn-primary">保存并分析</button>
+        </div>
+        <div id="input-result" class="result-area" style="display:none"></div>
+      </div>
+
+      <div id="subtab-settings" class="subtab-content">
+        <h2>管理</h2>
+        <div class="card">
+          <p>重建单词索引，按教材顺序重新计算每个单词的首次出现课程。</p>
+          <button id="btn-rebuild" class="btn-warning">重建单词索引</button>
+          <div id="rebuild-result" class="result-area" style="display:none"></div>
+        </div>
+        <h2>教材管理</h2>
+        <div id="mgmt-tree" class="tree-area">
+          <button class="btn-primary" id="btn-mgmt-refresh" onclick="loadMgmtTree()">刷新</button>
+        </div>
+      </div>
+
+      <div id="subtab-excluded" class="subtab-content">
+        <h2>排除词管理</h2>
+        <div class="card">
+          <div class="form-row">
+            <input id="inp-excluded-word" placeholder="输入要排除的单词">
+            <button class="btn-primary" onclick="addExcludedWord()">添加</button>
+            <button class="btn-sm" onclick="loadExcludedWords()">刷新</button>
+          </div>
+        </div>
+        <div id="excluded-result" class="result-area"></div>
+      </div>
+    
+      <div id="subtab-batch" class="subtab-content">
       <h2>批量导入</h2>
       <div class="card">
         <p class="hint">格式说明：每课用 <code>---</code> 分隔。头行: <code>Book name | Unit# | Unit title | Lesson# | Lesson title</code>，后续行为课文内容。首行可用 <code>#</code> 作为注释。</p>
@@ -90,17 +203,50 @@ Look at the red apple. The yellow banana is big."></textarea>
         <button id="btn-import" class="btn-primary">导入</button>
       </div>
       <div id="import-result" class="result-area" style="display:none"></div>
-    </section>
-
-    <!-- Tab 5: 管理 -->
-    <section id="tab-settings" class="tab-content">
-      <h2>管理</h2>
-      <div class="card">
-        <p>重建单词索引，按教材顺序重新计算每个单词的首次出现课程。</p>
-        <button id="btn-rebuild" class="btn-warning">重建单词索引</button>
-        <div id="rebuild-result" class="result-area" style="display:none"></div>
       </div>
-    </section>
+
+      <div id="subtab-migrate" class="subtab-content">
+        <h2>数据迁移</h2>
+
+        <div class="card">
+          <h3>📤 导出数据</h3>
+          <div class="form-row">
+            <label>选择课本:</label>
+            <select id="sel-export-book"><option value="">-- 选择课本 --</option></select>
+            <button class="btn-primary" onclick="exportSelectedBook()">导出选中课本</button>
+          </div>
+          <div class="form-row" style="margin-top:8px">
+            <button class="btn-primary" onclick="exportAllTextbooks()">导出全部教材</button>
+            <button class="btn-primary" onclick="exportQuizData()">导出测验数据</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h3>📥 导入数据</h3>
+          <div class="migrate-import-section">
+            <h4>导入教材</h4>
+            <div class="form-row">
+              <input type="file" id="file-import-textbook" accept=".json">
+            </div>
+            <div class="form-row">
+              <label><input type="checkbox" id="chk-import-textbook-clear"> 清除后导入（删除现有教材再导入）</label>
+              <button class="btn-warning" onclick="importTextbooks()">导入教材</button>
+            </div>
+          </div>
+          <div class="migrate-import-section" style="margin-top:12px">
+            <h4>导入测验</h4>
+            <div class="form-row">
+              <input type="file" id="file-import-quiz" accept=".json">
+            </div>
+            <div class="form-row">
+              <label><input type="checkbox" id="chk-import-quiz-clear"> 清除后导入（删除现有测验记录再导入）</label>
+              <button class="btn-warning" onclick="importQuiz()">导入测验</button>
+            </div>
+          </div>
+        </div>
+        <div id="migrate-result" class="result-area" style="display:none"></div>
+      </div>
+</section>
   </main>
 
   <footer>

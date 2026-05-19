@@ -11,3 +11,10 @@ build/
 data/
 .idea/
 .vscode/
+*.whl
+
+# Temp files
+tmp_*
+*.bak
+clean_textbook.py
+textbook_export_all_cleaned.json
